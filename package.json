@@ -18,8 +18,11 @@
   "homepage": "https://github.com/Nur-Dalilah/C237---CA2#readme",
   "description": "",
   "dependencies": {
+    "connect-flash": "^0.1.1",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
     "mysql2": "^3.14.2"
   }
 }

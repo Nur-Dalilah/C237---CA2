@@ -45,3 +45,32 @@ app.use(express.static('public'));
 app.use(express.urlencoded({
     extended: false
 }));
+
+//middleware?
+
+//registration route
+app.get('/register', (req, res) => {
+    res.render('register', { messages: req.flash('error'), formData: req.flash('formData')[0] });
+});
+
+app.post('/register', (req, res) => {
+
+    const {} = req.body;
+    const sql = 'INSERT INTO idk () VALUES ()';
+    connection.query(sql, [], (err, result) => {
+    }
+    console.log(result);
+        req.flash('success', 'Registration successful! Please log in.');
+        res.redirect('/login');
+    });
+});
+
+//login route 
+//login route
+app.get('/login', (req, res) => {
+    res.render('login', { messages: req.flash('success'), errors: req.flash('error') });
+});
+
+app.post('/login', (req, res) => {
+    const {  } = req.body;
+});

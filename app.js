@@ -209,32 +209,32 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/product/:id', checkAuthenticated, (req, res) => {
-  // Extract the product ID from the request parameters
+app.get('/listings/:id', checkAuthenticated, (req, res) => {
+  // Extract the listing ID from the request parameters
   const productId = req.params.id;
 
   // Fetch data from MySQL based on the product ID
-  connection.query('SELECT * FROM products WHERE productId = ?', [productId], (error, results) => {
+  connection.query('SELECT * FROM listings WHERE listingId = ?', [listingId], (error, results) => {
       if (error) throw error;
 
-      // Check if any product with the given ID was found
+      // Check if any listing with the given ID was found
       if (results.length > 0) {
           // Render HTML page with the product data
-          res.render('product', { product: results[0], user: req.session.user  });
+          res.render('listings', { listings: results[0], user: req.session.user  });
       } else {
           // If no product with the given ID was found, render a 404 page or handle it accordingly
-          res.status(404).send('Product not found');
+          res.status(404).send('Listing not found');
       }
   });
 });
 
-app.get('/addProduct', checkAuthenticated, checkAdmin, (req, res) => {
-    res.render('addProduct', {user: req.session.user } ); 
+app.get('/addListing', checkAuthenticated, checkAdmin, (req, res) => {
+    res.render('addListing', {user: req.session.user } ); 
 });
 
-app.post('/addProduct', upload.single('image'),  (req, res) => {
+app.post('/addListing', upload.single('image'),  (req, res) => {
     // Extract product data from the request body
-    const { name, quantity, price} = req.body;
+    const { listingName, description, price, image} = req.body;
     let image;
     if (req.file) {
         image = req.file.filename; // Save only the filename
@@ -242,13 +242,13 @@ app.post('/addProduct', upload.single('image'),  (req, res) => {
         image = null;
     }
 
-    const sql = 'INSERT INTO products (productName, quantity, price, image) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO listings (listingName, description, price, image) VALUES (?, ?, ?, ?)';
     // Insert the new product into the database
-    connection.query(sql , [name, quantity, price, image], (error, results) => {
+    connection.query(sql , [listingName, quantity, price, image], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
-            console.error("Error adding product:", error);
-            res.status(500).send('Error adding product');
+            console.error("Error adding listing:", error);
+            res.status(500).send('Error adding listing');
         } else {
             // Send a success response
             res.redirect('/inventory');

@@ -20,13 +20,8 @@ const upload = multer({ storage: storage });
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'idk',
-    database: 'idk'
-    //host:'files.io',
-    //port:'files.io',
-    //user:'files.io',
-    //password:'files.io',
-    //database:'files.io'
+    password: 'Republic_C207',
+    database: 'c237_supermarketdb'
   });
 
 connection.connect((err) => {
@@ -46,7 +41,7 @@ app.use(express.urlencoded({
     extended: false
 }));
 
-// SESSION MIDDLEWARE
+//TO DO: Insert code for Session Middleware below 
 app.use(session({
     secret: 'secret',
     resave: false,
@@ -98,7 +93,6 @@ app.get('/',  (req, res) => {
     res.render('index', {user: req.session.user} );
 });
 
-// GET INVENTORY
 app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
     // Fetch data from MySQL
     connection.query('SELECT * FROM products', (error, results) => {
@@ -107,35 +101,114 @@ app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
     });
 });
 
-//registration route
 app.get('/register', (req, res) => {
     res.render('register', { messages: req.flash('error'), formData: req.flash('formData')[0] });
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', validateRegistration, (req, res) => {
 
-    const {} = req.body;
-    const sql = 'INSERT INTO idk () VALUES ()';
-    connection.query(sql, [], (err, result) => {
-    }
-    console.log(result);
+    const { username, email, password, address, contact, role } = req.body;
+
+    const sql = 'INSERT INTO users (username, email, password, address, contact, role) VALUES (?, ?, SHA1(?), ?, ?, ?)';
+    connection.query(sql, [username, email, password, address, contact, role], (err, result) => {
+        if (err) {
+            throw err;
+        }
+        console.log(result);
         req.flash('success', 'Registration successful! Please log in.');
         res.redirect('/login');
     });
 });
 
-//login route 
-//login route
 app.get('/login', (req, res) => {
     res.render('login', { messages: req.flash('success'), errors: req.flash('error') });
 });
 
 app.post('/login', (req, res) => {
-    const {  } = req.body;
+    const { email, password } = req.body;
+
+    // Validate email and password
+    if (!email || !password) {
+        req.flash('error', 'All fields are required.');
+        return res.redirect('/login');
+    }
+
+    const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA1(?)';
+    connection.query(sql, [email, password], (err, results) => {
+        if (err) {
+            throw err;
+        }
+
+        if (results.length > 0) {
+            // Successful login
+            req.session.user = results[0]; 
+            req.flash('success', 'Login successful!');
+            if(req.session.user.role == 'user')
+                res.redirect('/shopping');
+            else
+                res.redirect('/inventory');
+        } else {
+            // Invalid credentials
+            req.flash('error', 'Invalid email or password.');
+            res.redirect('/login');
+        }
+    });
 });
 
+app.get('/shopping', checkAuthenticated, (req, res) => {
+    // Fetch data from MySQL
+    connection.query('SELECT * FROM products', (error, results) => {
+        if (error) throw error;
+        res.render('shopping', { user: req.session.user, products: results });
+      });
+});
 
-// VIEW PRODUCT 
+app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
+    const productId = parseInt(req.params.id);
+    const quantity = parseInt(req.body.quantity) || 1;
+
+    connection.query('SELECT * FROM products WHERE productId = ?', [productId], (error, results) => {
+        if (error) throw error;
+
+        if (results.length > 0) {
+            const product = results[0];
+
+            // Initialize cart in session if not exists
+            if (!req.session.cart) {
+                req.session.cart = [];
+            }
+
+            // Check if product already in cart
+            const existingItem = req.session.cart.find(item => item.productId === productId);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                req.session.cart.push({
+                    productId: product.productId,
+                    productName: product.productName,
+                    price: product.price,
+                    quantity: quantity,
+                    image: product.image
+                });
+            }
+
+            res.redirect('/cart');
+        } else {
+            res.status(404).send("Product not found");
+        }
+    });
+});
+
+app.get('/cart', checkAuthenticated, (req, res) => {
+    const cart = req.session.cart || [];
+    res.render('cart', { cart, user: req.session.user });
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
 app.get('/product/:id', checkAuthenticated, (req, res) => {
   // Extract the product ID from the request parameters
   const productId = req.params.id;
@@ -155,12 +228,10 @@ app.get('/product/:id', checkAuthenticated, (req, res) => {
   });
 });
 
-// ADD PRODUCT - GET
 app.get('/addProduct', checkAuthenticated, checkAdmin, (req, res) => {
     res.render('addProduct', {user: req.session.user } ); 
 });
 
-// ADD PRODUCT - POST
 app.post('/addProduct', upload.single('image'),  (req, res) => {
     // Extract product data from the request body
     const { name, quantity, price} = req.body;
@@ -185,7 +256,62 @@ app.post('/addProduct', upload.single('image'),  (req, res) => {
     });
 });
 
-// port 
+app.get('/updateProduct/:id',checkAuthenticated, checkAdmin, (req,res) => {
+    const productId = req.params.id;
+    const sql = 'SELECT * FROM products WHERE productId = ?';
+
+    // Fetch data from MySQL based on the product ID
+    connection.query(sql , [productId], (error, results) => {
+        if (error) throw error;
+
+        // Check if any product with the given ID was found
+        if (results.length > 0) {
+            // Render HTML page with the product data
+            res.render('updateProduct', { product: results[0] });
+        } else {
+            // If no product with the given ID was found, render a 404 page or handle it accordingly
+            res.status(404).send('Product not found');
+        }
+    });
+});
+
+app.post('/updateProduct/:id', upload.single('image'), (req, res) => {
+    const productId = req.params.id;
+    // Extract product data from the request body
+    const { name, quantity, price } = req.body;
+    let image  = req.body.currentImage; //retrieve current image filename
+    if (req.file) { //if new image is uploaded
+        image = req.file.filename; // set image to be new image filename
+    } 
+
+    const sql = 'UPDATE products SET productName = ? , quantity = ?, price = ?, image =? WHERE productId = ?';
+    // Insert the new product into the database
+    connection.query(sql, [name, quantity, price, image, productId], (error, results) => {
+        if (error) {
+            // Handle any error that occurs during the database operation
+            console.error("Error updating product:", error);
+            res.status(500).send('Error updating product');
+        } else {
+            // Send a success response
+            res.redirect('/inventory');
+        }
+    });
+});
+
+app.get('/deleteProduct/:id', (req, res) => {
+    const productId = req.params.id;
+
+    connection.query('DELETE FROM products WHERE productId = ?', [productId], (error, results) => {
+        if (error) {
+            // Handle any error that occurs during the database operation
+            console.error("Error deleting product:", error);
+            res.status(500).send('Error deleting product');
+        } else {
+            // Send a success response
+            res.redirect('/inventory');
+        }
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-

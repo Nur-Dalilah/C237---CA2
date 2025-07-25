@@ -256,41 +256,41 @@ app.post('/addListing', upload.single('image'),  (req, res) => {
     });
 });
 
-app.get('/updateProduct/:id',checkAuthenticated, checkAdmin, (req,res) => {
+app.get('/updateListing/:id',checkAuthenticated, checkAdmin, (req,res) => {
     const productId = req.params.id;
-    const sql = 'SELECT * FROM products WHERE productId = ?';
+    const sql = 'SELECT * FROM listingName WHERE listingId = ?';
 
     // Fetch data from MySQL based on the product ID
-    connection.query(sql , [productId], (error, results) => {
+    connection.query(sql , [listingId], (error, results) => {
         if (error) throw error;
 
         // Check if any product with the given ID was found
         if (results.length > 0) {
             // Render HTML page with the product data
-            res.render('updateProduct', { product: results[0] });
+            res.render('updateListing', { listings: results[0] });
         } else {
             // If no product with the given ID was found, render a 404 page or handle it accordingly
-            res.status(404).send('Product not found');
+            res.status(404).send('Listing not found');
         }
     });
 });
 
-app.post('/updateProduct/:id', upload.single('image'), (req, res) => {
-    const productId = req.params.id;
+app.post('/updateListing/:id', upload.single('image'), (req, res) => {
+    const listingId = req.params.id;
     // Extract product data from the request body
-    const { name, quantity, price } = req.body;
+    const { listingName, description, price } = req.body;
     let image  = req.body.currentImage; //retrieve current image filename
     if (req.file) { //if new image is uploaded
         image = req.file.filename; // set image to be new image filename
     } 
 
-    const sql = 'UPDATE products SET productName = ? , quantity = ?, price = ?, image =? WHERE productId = ?';
+    const sql = 'UPDATE listings SET listingName = ? , description = ?, price = ?, image =? WHERE listingId = ?';
     // Insert the new product into the database
-    connection.query(sql, [name, quantity, price, image, productId], (error, results) => {
+    connection.query(sql, [listingName, description, price, image, listingId], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
-            console.error("Error updating product:", error);
-            res.status(500).send('Error updating product');
+            console.error("Error updating listing:", error);
+            res.status(500).send('Error updating list');
         } else {
             // Send a success response
             res.redirect('/inventory');

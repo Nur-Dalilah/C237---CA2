@@ -298,10 +298,10 @@ app.post('/updateListing/:id', upload.single('image'), (req, res) => {
     });
 });
 
-app.get('/deleteProduct/:id', (req, res) => {
+app.get('/deleteListing/:id', (req, res) => {
     const productId = req.params.id;
 
-    connection.query('DELETE FROM products WHERE productId = ?', [productId], (error, results) => {
+    connection.query('DELETE FROM listings WHERE productId = ?', [productId], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error deleting product:", error);

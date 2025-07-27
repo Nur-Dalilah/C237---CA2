@@ -40,7 +40,36 @@
       </div>
     </div>
     
-    <div class="row g-4">
+    <!-- search Bar -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Search Listings</h5>
+        <form action="/listing" method="GET" class="row align-items-end">
+          <div class="col-md-8">
+            <label for="search" class="form-label">Search by name or description</label>
+            <input type="text" class="form-control" id="search" name="search" 
+                   placeholder="Enter keywords..." value="<%= typeof search !== 'undefined' ? search : '' %>">
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-success me-2">Search</button>
+            <% if (typeof search !== 'undefined' && search) { %>
+              <a href="/listing" class="btn btn-outline-secondary">Clear Search</a>
+            <% } %>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- drilldown when search found (ai used) -->
+    <% if (typeof search !== 'undefined' && search) { %>
+      <div class="alert alert-info">
+        <i class="bi bi-search"></i>
+        Showing results for: "<strong><%= search %></strong>" 
+        (<%= listing.length %> result<%= listing.length !== 1 ? 's' : '' %> found)
+      </div>
+    <% } %>
+    
+    <div class="row g-4" id="listingsContainer">
       <% for(let i=0; i < listing.length; i++) { %>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
           <div class="card h-100 shadow-sm">
@@ -92,5 +121,6 @@
       </div>
     <% } %>
   </div>
+
 </body>
 </html>

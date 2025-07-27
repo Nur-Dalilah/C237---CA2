@@ -95,11 +95,28 @@ app.get('/',  (req, res) => {
 });
 
 app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
-    // fetch data from mysql
-    connection.query('SELECT * FROM listings', (error, results) => {
-      if (error) throw error;
-      res.render('inventory', { listing: results, user: req.session.user });
-    });
+    const searchTerm = req.query.search;
+    
+    // if there's a search term, use LIKE query to search listings
+    if (searchTerm) {
+        const sql = 'SELECT * FROM listings WHERE listingName LIKE ? OR description LIKE ?';
+        const searchPattern = `%${searchTerm}%`;
+        
+        connection.query(sql, [searchPattern, searchPattern], (error, results) => {
+            if (error) throw error;
+            res.render('inventory', { 
+                user: req.session.user, 
+                listing: results, 
+                search: searchTerm 
+            });
+        });
+    } else {
+        // fetch all data from mysql if no search term
+        connection.query('SELECT * FROM listings', (error, results) => {
+            if (error) throw error;
+            res.render('inventory', { listing: results, user: req.session.user });
+        });
+    }
 });
 
 app.get('/register', (req, res) => {
@@ -157,11 +174,28 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/listing', checkAuthenticated, (req, res) => {
-    // fetch data from mysql
-    connection.query('SELECT * FROM listings', (error, results) => {
-        if (error) throw error;
-        res.render('listing', { user: req.session.user, listing: results });
-      });
+    const searchTerm = req.query.search;
+    
+    // if there's a search term, use LIKE query to search listings
+    if (searchTerm) {
+        const sql = 'SELECT * FROM listings WHERE listingName LIKE ? OR description LIKE ?';
+        const searchPattern = `%${searchTerm}%`;
+        
+        connection.query(sql, [searchPattern, searchPattern], (error, results) => {
+            if (error) throw error;
+            res.render('listing', { 
+                user: req.session.user, 
+                listing: results, 
+                search: searchTerm 
+            });
+        });
+    } else {
+        // fetch all data from mysql if no search term
+        connection.query('SELECT * FROM listings', (error, results) => {
+            if (error) throw error;
+            res.render('listing', { user: req.session.user, listing: results });
+        });
+    }
 });
 
 app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {

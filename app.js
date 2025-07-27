@@ -164,14 +164,14 @@ app.get('/shopping', checkAuthenticated, (req, res) => {
 });
 
 app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
-    const productId = parseInt(req.params.id);
+    const listingId = parseInt(req.params.id);
     const quantity = parseInt(req.body.quantity) || 1;
 
-    connection.query('SELECT * FROM products WHERE productId = ?', [productId], (error, results) => {
+    connection.query('SELECT * FROM listings WHERE listingId = ?', [listingId], (error, results) => {
         if (error) throw error;
 
         if (results.length > 0) {
-            const product = results[0];
+            const listing = results[0];
 
             // Initialize cart in session if not exists
             if (!req.session.cart) {
@@ -179,22 +179,22 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
             }
 
             // Check if product already in cart
-            const existingItem = req.session.cart.find(item => item.productId === productId);
+            const existingItem = req.session.cart.find(item => item.listingId === listingId);
             if (existingItem) {
                 existingItem.quantity += quantity;
             } else {
                 req.session.cart.push({
-                    productId: product.productId,
-                    productName: product.productName,
-                    price: product.price,
-                    quantity: quantity,
-                    image: product.image
+                    listingId: listing.listingId,
+                    listingName: listing.listingName,
+                    price: listing.price,
+                    description: description,
+                    image: listing.image
                 });
             }
 
             res.redirect('/cart');
         } else {
-            res.status(404).send("Product not found");
+            res.status(404).send("Listing not found");
         }
     });
 });
@@ -209,18 +209,18 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/listings/:id', checkAuthenticated, (req, res) => {
+app.get('/listing/:id', checkAuthenticated, (req, res) => {
   // Extract the listing ID from the request parameters
   const productId = req.params.id;
 
   // Fetch data from MySQL based on the product ID
-  connection.query('SELECT * FROM listings WHERE listingId = ?', [listingId], (error, results) => {
+  connection.query('SELECT * FROM listing WHERE listingId = ?', [listingId], (error, results) => {
       if (error) throw error;
 
       // Check if any listing with the given ID was found
       if (results.length > 0) {
           // Render HTML page with the product data
-          res.render('listings', { listings: results[0], user: req.session.user  });
+          res.render('listings', { listing: results[0], user: req.session.user  });
       } else {
           // If no product with the given ID was found, render a 404 page or handle it accordingly
           res.status(404).send('Listing not found');
@@ -233,7 +233,7 @@ app.get('/addListing', checkAuthenticated, checkAdmin, (req, res) => {
 });
 
 app.post('/addListing', upload.single('image'),  (req, res) => {
-    // Extract product data from the request body
+    // Extract listing data from the request body
     const { listingName, description, price, image} = req.body;
     let image;
     if (req.file) {
@@ -242,9 +242,9 @@ app.post('/addListing', upload.single('image'),  (req, res) => {
         image = null;
     }
 
-    const sql = 'INSERT INTO listings (listingName, description, price, image) VALUES (?, ?, ?, ?)';
-    // Insert the new product into the database
-    connection.query(sql , [listingName, quantity, price, image], (error, results) => {
+    const sql = 'INSERT INTO listing (listingName, description, price, image) VALUES (?, ?, ?, ?)';
+    // Insert the new listing into the database
+    connection.query(sql , [listingName, description, price, image], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error adding listing:", error);

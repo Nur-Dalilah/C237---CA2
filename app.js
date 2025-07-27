@@ -18,11 +18,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const connection = mysql.createConnection({
-    host: 'localhost',
+    host: 'switchyard.proxy.rlwy.net',
+    port: 42564,
     user: 'root',
-    password: 'Republic_C207',
-    database: 'c237_ca2db'
-  });
+    password: 'ejkCTGWYkRbYooUcykISTUVCfyRiPgcy',
+    database: 'c237_CA2db'
+});
 
 connection.connect((err) => {
     if (err) {

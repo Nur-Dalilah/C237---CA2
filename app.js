@@ -157,9 +157,9 @@ app.post('/login', (req, res) => {
 
 app.get('/shopping', checkAuthenticated, (req, res) => {
     // Fetch data from MySQL
-    connection.query('SELECT * FROM products', (error, results) => {
+    connection.query('SELECT * FROM listings', (error, results) => {
         if (error) throw error;
-        res.render('shopping', { user: req.session.user, products: results });
+        res.render('shopping', { user: req.session.user, listings: results });
       });
 });
 
@@ -171,7 +171,7 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
         if (error) throw error;
 
         if (results.length > 0) {
-            const listing = results[0];
+            const listings = results[0];
 
             // Initialize cart in session if not exists
             if (!req.session.cart) {
@@ -184,11 +184,11 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
                 existingItem.quantity += quantity;
             } else {
                 req.session.cart.push({
-                    listingId: listing.listingId,
-                    listingName: listing.listingName,
-                    price: listing.price,
-                    description: description,
-                    image: listing.image
+                    listingId: listings.listingId,
+                    listingName: listings.listingName,
+                    price: listings.price,
+                    description: listings.description,
+                    image: listings.image
                 });
             }
 
@@ -209,12 +209,12 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/listing/:id', checkAuthenticated, (req, res) => {
+app.get('/listings/:id', checkAuthenticated, (req, res) => {
   // Extract the listing ID from the request parameters
-  const productId = req.params.id;
+  const listingId = req.params.id;
 
   // Fetch data from MySQL based on the product ID
-  connection.query('SELECT * FROM listing WHERE listingId = ?', [listingId], (error, results) => {
+  connection.query('SELECT * FROM listings WHERE listingId = ?', [listingId], (error, results) => {
       if (error) throw error;
 
       // Check if any listing with the given ID was found
@@ -234,7 +234,7 @@ app.get('/addListing', checkAuthenticated, checkAdmin, (req, res) => {
 
 app.post('/addListing', upload.single('image'),  (req, res) => {
     // Extract listing data from the request body
-    const { listingName, description, price, image} = req.body;
+    const { listingName, description, price} = req.body;
     let image;
     if (req.file) {
         image = req.file.filename; // Save only the filename
@@ -242,7 +242,7 @@ app.post('/addListing', upload.single('image'),  (req, res) => {
         image = null;
     }
 
-    const sql = 'INSERT INTO listing (listingName, description, price, image) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO listings (listingName, description, price, image) VALUES (?, ?, ?, ?)';
     // Insert the new listing into the database
     connection.query(sql , [listingName, description, price, image], (error, results) => {
         if (error) {

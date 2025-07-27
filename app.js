@@ -5,10 +5,10 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const app = express();
 
-// Set up multer for file uploads
+// set up multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/images'); // Directory to save uploaded files
+        cb(null, 'public/images'); // directory to save uploaded files
     },
     filename: (req, file, cb) => {
         cb(null, file.originalname); 
@@ -21,7 +21,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'Republic_C207',
-    database: 'c237_supermarketdb'
+    database: 'c237_ca2db'
   });
 
 connection.connect((err) => {
@@ -32,7 +32,7 @@ connection.connect((err) => {
     console.log('Connected to MySQL database');
 });
 
-// Set up view engine
+// set up view engine
 app.set('view engine', 'ejs');
 //  enable static files
 app.use(express.static('public'));
@@ -41,18 +41,18 @@ app.use(express.urlencoded({
     extended: false
 }));
 
-//TO DO: Insert code for Session Middleware below 
+//TO DO: insert code for Session Middleware below 
 app.use(session({
     secret: 'secret',
     resave: false,
     saveUninitialized: true,
-    // Session expires after 1 week of inactivity
+    // session expires after 1 week of inactivity
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 } 
 }));
 
 app.use(flash());
 
-// Middleware to check if user is logged in
+// middleware to check if user is logged in
 const checkAuthenticated = (req, res, next) => {
     if (req.session.user) {
         return next();
@@ -62,7 +62,7 @@ const checkAuthenticated = (req, res, next) => {
     }
 };
 
-// Middleware to check if user is admin
+// middleware to check if user is admin
 const checkAdmin = (req, res, next) => {
     if (req.session.user.role === 'admin') {
         return next();
@@ -72,7 +72,7 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
-// Middleware for form validation
+// middleware for form validation
 const validateRegistration = (req, res, next) => {
     const { username, email, password, address, contact, role } = req.body;
 
@@ -88,16 +88,16 @@ const validateRegistration = (req, res, next) => {
     next();
 };
 
-// Define routes
+// define routes
 app.get('/',  (req, res) => {
     res.render('index', {user: req.session.user} );
 });
 
 app.get('/inventory', checkAuthenticated, checkAdmin, (req, res) => {
-    // Fetch data from MySQL
-    connection.query('SELECT * FROM products', (error, results) => {
+    // fetch data from mysql
+    connection.query('SELECT * FROM listings', (error, results) => {
       if (error) throw error;
-      res.render('inventory', { products: results, user: req.session.user });
+      res.render('inventory', { listing: results, user: req.session.user });
     });
 });
 
@@ -127,7 +127,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    // Validate email and password
+    // validate email and password
     if (!email || !password) {
         req.flash('error', 'All fields are required.');
         return res.redirect('/login');
@@ -140,26 +140,26 @@ app.post('/login', (req, res) => {
         }
 
         if (results.length > 0) {
-            // Successful login
+            // successful login
             req.session.user = results[0]; 
             req.flash('success', 'Login successful!');
             if(req.session.user.role == 'user')
-                res.redirect('/shopping');
+                res.redirect('/listing');
             else
                 res.redirect('/inventory');
         } else {
-            // Invalid credentials
+            // invalid credentials
             req.flash('error', 'Invalid email or password.');
             res.redirect('/login');
         }
     });
 });
 
-app.get('/shopping', checkAuthenticated, (req, res) => {
-    // Fetch data from MySQL
+app.get('/listing', checkAuthenticated, (req, res) => {
+    // fetch data from mysql
     connection.query('SELECT * FROM listings', (error, results) => {
         if (error) throw error;
-        res.render('shopping', { user: req.session.user, listings: results });
+        res.render('listing', { user: req.session.user, listing: results });
       });
 });
 
@@ -171,24 +171,24 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
         if (error) throw error;
 
         if (results.length > 0) {
-            const listings = results[0];
+            const listing = results[0];
 
-            // Initialize cart in session if not exists
+            // initialize cart in session if not exists
             if (!req.session.cart) {
                 req.session.cart = [];
             }
 
-            // Check if product already in cart
+            //check if product already in cart
             const existingItem = req.session.cart.find(item => item.listingId === listingId);
             if (existingItem) {
                 existingItem.quantity += quantity;
             } else {
                 req.session.cart.push({
-                    listingId: listings.listingId,
-                    listingName: listings.listingName,
-                    price: listings.price,
-                    description: listings.description,
-                    image: listings.image
+                    listingId: listing.listingId,
+                    listingName: listing.listingName,
+                    price: listing.price,
+                    description: listing.description,
+                    image: listing.image
                 });
             }
 
@@ -209,67 +209,71 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/listings/:id', checkAuthenticated, (req, res) => {
-  // Extract the listing ID from the request parameters
+app.get('/listing/:id', checkAuthenticated, (req, res) => {
+  // extract the listing id from the request parameters
   const listingId = req.params.id;
 
-  // Fetch data from MySQL based on the product ID
+  // fetch data from mysql based on the product id
   connection.query('SELECT * FROM listings WHERE listingId = ?', [listingId], (error, results) => {
       if (error) throw error;
 
-      // Check if any listing with the given ID was found
+      // check if any listing with the given id was found
       if (results.length > 0) {
-          // Render HTML page with the product data
-          res.render('listings', { listing: results[0], user: req.session.user  });
+          // render html page with the product data
+          res.render('listing', { listing: results[0], user: req.session.user  });
       } else {
-          // If no product with the given ID was found, render a 404 page or handle it accordingly
+          // if no product with the given id was found, render 404
           res.status(404).send('Listing not found');
       }
   });
 });
 
-app.get('/addListing', checkAuthenticated, checkAdmin, (req, res) => {
+app.get('/addListing', checkAuthenticated, (req, res) => {
     res.render('addListing', {user: req.session.user } ); 
 });
 
 app.post('/addListing', upload.single('image'),  (req, res) => {
-    // Extract listing data from the request body
+    //extract listing data from the request body
     const { listingName, description, price} = req.body;
     let image;
     if (req.file) {
-        image = req.file.filename; // Save only the filename
+        image = req.file.filename; // save only the filename
     } else {
         image = null;
     }
 
     const sql = 'INSERT INTO listings (listingName, description, price, image) VALUES (?, ?, ?, ?)';
-    // Insert the new listing into the database
+    // insert the new listing into the database
     connection.query(sql , [listingName, description, price, image], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
+            // handle any error that occurs during the database operation
             console.error("Error adding listing:", error);
             res.status(500).send('Error adding listing');
         } else {
-            // Send a success response
-            res.redirect('/inventory');
+            //redirect based on user role
+            if (req.session.user.role === 'admin') {
+                res.redirect('/inventory');
+            } else {
+                res.redirect('/listing');
+            }
         }
     });
 });
 
 app.get('/updateListing/:id',checkAuthenticated, checkAdmin, (req,res) => {
-    const productId = req.params.id;
-    const sql = 'SELECT * FROM listingName WHERE listingId = ?';
+    const listingId = req.params.id;
+    const sql = 'SELECT * FROM listings WHERE listingId = ?';
 
-    // Fetch data from MySQL based on the product ID
+    // fetch data from mysql based on the product id
     connection.query(sql , [listingId], (error, results) => {
         if (error) throw error;
 
-        // Check if any product with the given ID was found
+        // check if any product with the given id was found
         if (results.length > 0) {
-            // Render HTML page with the product data
-            res.render('updateListing', { listings: results[0] });
+            // render html page with the product data
+            res.render('updateListing', { listing: results[0] });
         } else {
-            // If no product with the given ID was found, render a 404 page or handle it accordingly
+            // if no product with the given id was found, render 404
             res.status(404).send('Listing not found');
         }
     });
@@ -277,7 +281,7 @@ app.get('/updateListing/:id',checkAuthenticated, checkAdmin, (req,res) => {
 
 app.post('/updateListing/:id', upload.single('image'), (req, res) => {
     const listingId = req.params.id;
-    // Extract product data from the request body
+    // extract product data from the request body
     const { listingName, description, price } = req.body;
     let image  = req.body.currentImage; //retrieve current image filename
     if (req.file) { //if new image is uploaded
@@ -285,29 +289,29 @@ app.post('/updateListing/:id', upload.single('image'), (req, res) => {
     } 
 
     const sql = 'UPDATE listings SET listingName = ? , description = ?, price = ?, image =? WHERE listingId = ?';
-    // Insert the new product into the database
+    // insert the new product into the database
     connection.query(sql, [listingName, description, price, image, listingId], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
+            // handle error during the database operation
             console.error("Error updating listing:", error);
             res.status(500).send('Error updating list');
         } else {
-            // Send a success response
+            // send a success response
             res.redirect('/inventory');
         }
     });
 });
 
 app.get('/deleteListing/:id', (req, res) => {
-    const productId = req.params.id;
+    const listingId = req.params.id;
 
-    connection.query('DELETE FROM listings WHERE productId = ?', [productId], (error, results) => {
+    connection.query('DELETE FROM listings WHERE listingId = ?', [listingId], (error, results) => {
         if (error) {
-            // Handle any error that occurs during the database operation
-            console.error("Error deleting product:", error);
-            res.status(500).send('Error deleting product');
+            // handle any error that occurs during the database operation
+            console.error("Error deleting listing:", error);
+            res.status(500).send('Error deleting listing');
         } else {
-            // Send a success response
+            // send a success response
             res.redirect('/inventory');
         }
     });

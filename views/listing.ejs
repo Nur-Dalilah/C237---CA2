@@ -17,7 +17,7 @@
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="/addListing">Add Product</a>
+              <a class="nav-link" href="/cart">View Cart</a>
             </li> 
             <li class="nav-item">
               <a class="nav-link" href="/logout">Logout</a>
@@ -31,7 +31,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <p class="mb-1">Welcome, <%= user.username %> (<%= user.role %>)</p>
-        <h2 class="mb-0">Manage Inventory</h2>
+        <h2 class="mb-0">Browse Listings</h2>
       </div>
       <div>
         <a href="/addListing" class="btn btn-success">
@@ -66,18 +66,14 @@
                 <h5 class="text-primary mb-0 fw-bold">$<%= listing[i].price.toFixed(2) %></h5>
               </div>
               
-              <!-- admin actions -->
+              <!-- add to cart button -->
               <div class="mt-auto">
-                <div class="d-grid gap-2">
-                  <a href="/updateListing/<%= listing[i].listingId %>" class="btn btn-warning btn-sm">
-                    <i class="bi bi-pencil-square me-1"></i>Edit
-                  </a>
-                  <a href="/deleteListing/<%= listing[i].listingId %>" 
-                     onclick="return confirm('Are you sure you want to delete this?')" 
-                     class="btn btn-danger btn-sm">
-                    <i class="bi bi-trash me-1"></i>Delete
-                  </a>
-                </div>
+                <form action="/add-to-cart/<%= listing[i].listingId %>" method="POST" class="d-grid">
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -91,8 +87,8 @@
         <div class="mb-3">
           <i class="bi bi-inbox" style="font-size: 4rem; color: #6c757d;"></i>
         </div>
-        <h4 class="text-muted">No products in inventory</h4>
-        <p class="text-muted">Add some products to get started!</p>
+        <h4 class="text-muted">No listings available</h4>
+        <p class="text-muted">Check back later for new items!</p>
       </div>
     <% } %>
   </div>

@@ -8,7 +8,7 @@
   <title>Listing App</title>
 </head>
 <body>
-  <!-- Navbar -->
+  <!-- navbar -->
   <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="/">Listing App</a>
@@ -31,19 +31,19 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- main content -->
   <div class="container mt-4">
     <h2 class="text-center mb-4">Add New Listing</h2>
     <form action="/addListing" method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 500px;">
 
       <div class="mb-3">
-        <label for="name" class="form-label">Listing Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+        <label for="listingName" class="form-label">Listing Name</label>
+        <input type="text" class="form-control" id="listingName" name="listingName" required>
       </div>
 
       <div class="mb-3">
-        <label for="quantity" class="form-label">Quantity</label>
-        <input type="number" class="form-control" id="quantity" name="quantity" min="0" step="1" required>
+        <label for="description" class="form-label">Description</label>
+        <input type="text" class="form-control" id="description" name="description" required>
       </div>
 
       <div class="mb-3">

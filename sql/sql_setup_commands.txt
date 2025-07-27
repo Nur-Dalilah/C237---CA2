@@ -3,23 +3,23 @@ START TRANSACTION;
 SET time_zone = "+00:00";
 
 CREATE DATABASE IF NOT EXISTS `c237_CA2db` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `c237_CA2db`;
+USE `railway`;
 
 CREATE TABLE `listings` (
   `listingId` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `listingName` varchar(200) NOT NULL,
   `description` varchar(500) NOT NULL,
   `price` double(10,2) NOT NULL,
-  `image` varchar(50) NOT NULL
+  `image` varchar(500) NOT NULL
 );
 
 INSERT INTO `listings` (`listingId`, `listingName`, `description`, `price`, `image`) VALUES
-(1, 'Xbox 360', 'Pre-Used Xbox 360... Good condition', 320.78, 'apples.png'),
-(2, 'PS5', 'Like new, rarely used PS5... Good condition', 578.00, 'bananas.png'),
-(3, 'GMK65 Keyboard', 'Fully custom keyboard! contact for specs', 58.00, 'milk.png'),
-(4, 'iPhone 15 Max', 'Well-used, willing to nego price', 1300.00, 'bread.png'),
-(14, 'Samsung Galaxy Tablet [WTS]', 'Well-used, willing to nego price', 670.00, 'tomatoes.png'),
-(19, 'Mouse Computer', 'New, came free with keyboard as a set ', 5.00, 'Broccoli.png');
+(1, 'Xbox 360', 'Pre-Used Xbox 360... Good condition', 320.78, 'Riceshower.JPG'),
+(2, 'PS5', 'Like new, rarely used PS5... Good condition', 578.00, 'Riceshower.JPG'),
+(3, 'GMK65 Keyboard', 'Fully custom keyboard! contact for specs', 58.00, 'Riceshower.JPG'),
+(4, 'iPhone 15 Max', 'Well-used, willing to nego price', 1300.00, 'Riceshower.JPG'),
+(14, 'Samsung Galaxy Tablet [WTS]', 'Well-used, willing to nego price', 670.00, 'Riceshower.JPG'),
+(19, 'Mouse Computer', 'New, came free with keyboard as a set ', 5.00, 'Riceshower.JPG');
 
 
 CREATE TABLE `users` (
@@ -33,6 +33,6 @@ CREATE TABLE `users` (
 );
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `address`, `contact`, `role`) VALUES
-(1, 'Peter Lim', 'peter@peter.com', '9a4dc937ac9f581c535ea262096f0af7e8002fba', 'Woodlands Ave 2', '98765432', 'admin'),
-(2, 'Mary Tan', 'mary@mary.com', 'ed253aa920d1c7d0b16c9bc85fe581af8286d88f', 'Tampines Ave 1', '12345678', 'user');
-
+(1, 'Peter Lim', 'peter@gmail.com', '9a4dc937ac9f581c535ea262096f0af7e8002fba', 'Woodlands Ave 2', '98765432', 'admin'),
+(2, 'Mary Tan', 'mary@gmail.com', 'ed253aa920d1c7d0b16c9bc85fe581af8286d88f', 'Tampines Ave 1', '12345678', 'user');
+	

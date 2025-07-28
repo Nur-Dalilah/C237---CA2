@@ -17,15 +17,15 @@
       </button>
       <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <ul class="navbar-nav">
+         <% if (!admin) {%>
           <li class="nav-item">
             <a class="nav-link" href="/inventory">Inventory</a>
-          </li> 
-          <li class="nav-item">
-            <a class="nav-link" href="/addListing">Add New Listing</a>
-          </li> 
+          </li>
+         <% } else { %>
           <li class="nav-item">
             <a class="nav-link" href="/logout">Logout</a>
           </li> 
+         <% } %>
         </ul>
       </div>
     </div>

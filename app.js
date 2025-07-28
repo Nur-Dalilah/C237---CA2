@@ -234,6 +234,19 @@ app.post('/add-to-cart/:id', checkAuthenticated, (req, res) => {
     });
 });
 
+app.post('/remove-from-cart/:id', checkAuthenticated, (req, res) => {
+    const listingId = parseInt(req.params.id);
+
+    if (!req.session.cart) {
+        return res.redirect('/cart');
+    }
+
+    // Filter out the item to be removed
+    req.session.cart = req.session.cart.filter(item => item.listingId !== listingId);
+
+    res.redirect('/cart');
+});
+
 app.get('/cart', checkAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     res.render('cart', { cart, user: req.session.user });

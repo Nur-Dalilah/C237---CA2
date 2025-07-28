@@ -254,8 +254,8 @@ app.get('/listing/:id', checkAuthenticated, (req, res) => {
 
       // check if any listing with the given id was found
       if (results.length > 0) {
-          // render html page with the product data
-          res.render('listing', { listing: results[0], user: req.session.user  });
+          // render details page with the product data
+          res.render('listingDetails', { listing: results[0], user: req.session.user });
       } else {
           // if no product with the given id was found, render 404
           res.status(404).send('Listing not found');

@@ -16,9 +16,11 @@
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
           <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="/cart">View Cart</a>
-            </li> 
+            <% if (user.role !== 'admin') { %>
+              <li class="nav-item">
+                <a class="nav-link" href="/cart">View Cart</a>
+              </li> 
+            <% } %>
             <li class="nav-item">
               <a class="nav-link" href="/logout">Logout</a>
             </li> 
@@ -97,12 +99,16 @@
               
               <!-- add to cart button -->
               <div class="mt-auto">
-                <form action="/add-to-cart/<%= listing[i].listingId %>" method="POST" class="d-grid">
-                  <input type="hidden" name="quantity" value="1">
-                  <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="bi bi-cart-plus me-1"></i>Add to Cart
-                  </button>
-                </form>
+                <% if (user.role !== 'admin') { %>
+                  <form action="/add-to-cart/<%= listing[i].listingId %>" method="POST" class="d-grid">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                      <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                    </button>
+                  </form>
+                <% } else { %>
+                  <p class="text-muted small text-center">Use a user account to purchase</p>
+                <% } %>
               </div>
             </div>
           </div>
